@@ -228,6 +228,9 @@ public class AutomataProjectApp extends JFrame {
         sb.append("Ends with 0: ").append(!input.isEmpty() && input.charAt(input.length() - 1) == '0').append("\n");
         sb.append("Accepted: ").append(accepted ? "YES" : "NO").append("\n");
 
+        // Generate the Graphviz Diagram
+        sb.append(buildDfaDotFormat(state));
+
         dfaOutputArea.setText(sb.toString());
     }
 
@@ -238,6 +241,36 @@ public class AutomataProjectApp extends JFrame {
             case "q2_0", "q2_1" -> ch == '0' ? "q2_0" : "q0_1";
             default -> throw new IllegalStateException("Unknown state: " + state);
         };
+    }
+
+    // New Method: Generates the Visual Diagram format
+    private String buildDfaDotFormat(String finalState) {
+        StringBuilder dot = new StringBuilder();
+        dot.append("\n======================================================\n");
+        dot.append(" GRAPHVIZ DIAGRAM CODE (Copy/Paste to dreampuf.github.io/GraphvizOnline)\n");
+        dot.append("======================================================\n");
+        dot.append("digraph DFA {\n");
+        dot.append("  rankdir=LR;\n");
+        dot.append("  node [shape = doublecircle]; q0_0;\n");
+        dot.append("  node [shape = circle];\n");
+        dot.append("  start [shape = point];\n");
+        dot.append("  start -> q0_1;\n");
+        dot.append("  q0_1 -> q0_0 [label=\"0\"];\n");
+        dot.append("  q0_1 -> q1_1 [label=\"1\"];\n");
+        dot.append("  q0_0 -> q0_0 [label=\"0\"];\n");
+        dot.append("  q0_0 -> q1_1 [label=\"1\"];\n");
+        dot.append("  q1_0 -> q1_0 [label=\"0\"];\n");
+        dot.append("  q1_0 -> q2_1 [label=\"1\"];\n");
+        dot.append("  q1_1 -> q1_0 [label=\"0\"];\n");
+        dot.append("  q1_1 -> q2_1 [label=\"1\"];\n");
+        dot.append("  q2_0 -> q2_0 [label=\"0\"];\n");
+        dot.append("  q2_0 -> q0_1 [label=\"1\"];\n");
+        dot.append("  q2_1 -> q2_0 [label=\"0\"];\n");
+        dot.append("  q2_1 -> q0_1 [label=\"1\"];\n");
+        dot.append("  \n  // Highlights the final state reached by your string\n");
+        dot.append("  ").append(finalState).append(" [style=filled, fillcolor=lightblue];\n");
+        dot.append("}\n");
+        return dot.toString();
     }
 
     private String buildAnBnPdaDescription() {
