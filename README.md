@@ -46,11 +46,3 @@ javac AutomataProjectApp.java
 java AutomataProjectApp
 ```
 
-## Notes for report screenshots
-
-Suggested screenshots:
-1. CFG input and generated PDA output
-2. DFA accepted example, such as `1110`
-3. DFA rejected example, such as `1011`
-4. PDA accepted example, such as `aaabbb`
-5. PDA rejected example, such as `aabbb`

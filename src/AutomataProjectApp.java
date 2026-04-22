@@ -1,8 +1,8 @@
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 
 public class AutomataProjectApp extends JFrame {
 
@@ -176,19 +176,17 @@ public class AutomataProjectApp extends JFrame {
         sb.append("We must track TWO things together:\n");
         sb.append("1) count(1s) mod 3\n");
         sb.append("2) whether the last symbol is 0 or 1\n\n");
-        sb.append("States:\n");
-        sb.append("qs   = start state (no symbol read yet)\n");
+        sb.append("States (Minimized to 6 states):\n");
+        sb.append("q0_1 = START STATE or (ones ≡ 0 (mod 3), last symbol = 1)\n");
         sb.append("q0_0 = ones ≡ 0 (mod 3), last symbol = 0   [ACCEPT]\n");
-        sb.append("q0_1 = ones ≡ 0 (mod 3), last symbol = 1\n");
         sb.append("q1_0 = ones ≡ 1 (mod 3), last symbol = 0\n");
         sb.append("q1_1 = ones ≡ 1 (mod 3), last symbol = 1\n");
         sb.append("q2_0 = ones ≡ 2 (mod 3), last symbol = 0\n");
         sb.append("q2_1 = ones ≡ 2 (mod 3), last symbol = 1\n\n");
         sb.append("Transition table:\n");
         sb.append(String.format("%-6s %-8s %-8s%n", "State", "on 0", "on 1"));
-        sb.append(String.format("%-6s %-8s %-8s%n", "qs",   "q0_0", "q1_1"));
-        sb.append(String.format("%-6s %-8s %-8s%n", "q0_0", "q0_0", "q1_1"));
         sb.append(String.format("%-6s %-8s %-8s%n", "q0_1", "q0_0", "q1_1"));
+        sb.append(String.format("%-6s %-8s %-8s%n", "q0_0", "q0_0", "q1_1"));
         sb.append(String.format("%-6s %-8s %-8s%n", "q1_0", "q1_0", "q2_1"));
         sb.append(String.format("%-6s %-8s %-8s%n", "q1_1", "q1_0", "q2_1"));
         sb.append(String.format("%-6s %-8s %-8s%n", "q2_0", "q2_0", "q0_1"));
@@ -208,18 +206,22 @@ public class AutomataProjectApp extends JFrame {
             return;
         }
 
-        String state = "qs";
+        String state = "q0_1"; // Optimized start state
+        int onesCount = 0;     // Integrated loop optimization
+        
         sb.append("Simulation:\n");
-        sb.append("Start at state: qs\n");
+        sb.append("Start at state: q0_1\n");
         for (int i = 0; i < input.length(); i++) {
             char ch = input.charAt(i);
+            if (ch == '1') {
+                onesCount++;
+            }
             String next = nextDfaState(state, ch);
             sb.append("Read '").append(ch).append("' : ").append(state).append(" -> ").append(next).append("\n");
             state = next;
         }
 
         boolean accepted = "q0_0".equals(state);
-        int onesCount = (int) input.chars().filter(c -> c == '1').count();
 
         sb.append("\nFinal state: ").append(state).append("\n");
         sb.append("Number of 1s: ").append(onesCount).append("\n");
@@ -231,7 +233,6 @@ public class AutomataProjectApp extends JFrame {
 
     private String nextDfaState(String state, char ch) {
         return switch (state) {
-            case "qs" -> ch == '0' ? "q0_0" : "q1_1";
             case "q0_0", "q0_1" -> ch == '0' ? "q0_0" : "q1_1";
             case "q1_0", "q1_1" -> ch == '0' ? "q1_0" : "q2_1";
             case "q2_0", "q2_1" -> ch == '0' ? "q2_0" : "q0_1";
