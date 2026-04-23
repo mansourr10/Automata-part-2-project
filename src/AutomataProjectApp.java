@@ -88,6 +88,54 @@ public class AutomataProjectApp extends JFrame {
         panel.add(south, BorderLayout.SOUTH);
         return panel;
     }
+    private String generateRandomAcceptedString() {
+    Random rand = new Random();
+
+    while (true) {
+        int length = rand.nextInt(12) + 1; 
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < length; i++) {
+            sb.append(rand.nextBoolean() ? '1' : '0');
+        }
+
+        String s = sb.toString();
+
+        int ones = 0;
+        for (char c : s.toCharArray()) {
+            if (c == '1') ones++;
+        }
+
+        if (ones % 3 == 0 && s.charAt(s.length() - 1) == '0') {
+            return s;
+        }
+    }
+}
+private String generateRandomRejectedString() {
+    Random rand = new Random();
+
+    while (true) {
+        int length = rand.nextInt(12) + 1; 
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < length; i++) {
+            sb.append(rand.nextBoolean() ? '1' : '0');
+        }
+
+        String s = sb.toString();
+
+        int ones = 0;
+        for (char c : s.toCharArray()) {
+            if (c == '1') ones++;
+        }
+
+        boolean accepted = (ones % 3 == 0) && (s.charAt(s.length() - 1) == '0');
+
+        if (!accepted) {
+            return s; 
+        }
+    }
+}
 
     private JPanel buildDfaPanel() {
         JPanel panel = new JPanel(new BorderLayout(12, 12));
@@ -110,11 +158,11 @@ public class AutomataProjectApp extends JFrame {
         top.add(testButton);
 
         JButton loadAccepted = new JButton("Load Accepted Example");
-        loadAccepted.addActionListener(e -> dfaInputField.setText("1110"));
+        loadAccepted.addActionListener(e -> dfaInputField.setText(generateRandomAcceptedString()));
         top.add(loadAccepted);
 
         JButton loadRejected = new JButton("Load Rejected Example");
-        loadRejected.addActionListener(e -> dfaInputField.setText("1011"));
+        loadRejected.addActionListener(e -> dfaInputField.setText(generateRandomRejectedString()));
         top.add(loadRejected);
 
         panel.add(top, BorderLayout.CENTER);
@@ -143,18 +191,68 @@ public class AutomataProjectApp extends JFrame {
         top.add(testButton);
 
         JButton loadAccepted = new JButton("Load Accepted Example");
-        loadAccepted.addActionListener(e -> pdaInputField.setText("aaabbb"));
+        loadAccepted.addActionListener(e -> pdaInputField.setText(generateAcceptedAnBn()));
         top.add(loadAccepted);
 
         JButton loadRejected = new JButton("Load Rejected Example");
-        loadRejected.addActionListener(e -> pdaInputField.setText("aabbb"));
+        loadRejected.addActionListener(e -> pdaInputField.setText(generateRejectedAnBn()));
         top.add(loadRejected);
 
         panel.add(top, BorderLayout.CENTER);
         panel.add(wrapWithTitledScroll("PDA Description and Result", pdaOutputArea), BorderLayout.SOUTH);
         return panel;
     }
+private String generateAcceptedAnBn() {
+    Random rand = new Random();
 
+    int n = rand.nextInt(6);
+
+    StringBuilder sb = new StringBuilder();
+
+    for (int i = 0; i < n; i++) {
+        sb.append('a');
+    }
+    for (int i = 0; i < n; i++) {
+        sb.append('b');
+    }
+
+    return sb.toString();
+}
+private String generateRejectedAnBn() {
+    Random rand = new Random();
+
+    int length = rand.nextInt(12) + 1;
+    StringBuilder sb = new StringBuilder();
+
+    for (int i = 0; i < length; i++) {
+        sb.append(rand.nextBoolean() ? 'a' : 'b');
+    }
+
+    String s = sb.toString();
+
+    if (isValidAnBn(s)) {
+        return generateRejectedAnBn();
+    }
+
+    return s;
+}
+private boolean isValidAnBn(String s) {
+    int i = 0;
+
+    while (i < s.length() && s.charAt(i) == 'a') {
+        i++;
+    }
+
+    int aCount = i;
+
+    int bCount = 0;
+    while (i < s.length() && s.charAt(i) == 'b') {
+        i++;
+        bCount++;
+    }
+
+    return i == s.length() && aCount == bCount;
+}
     private JScrollPane wrapWithTitledScroll(String title, JTextArea area) {
         JScrollPane scrollPane = new JScrollPane(area);
         scrollPane.setBorder(BorderFactory.createTitledBorder(title));
