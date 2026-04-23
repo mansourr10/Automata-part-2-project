@@ -186,7 +186,7 @@ public class AutomataProjectApp extends JFrame {
         sb.append("F (Accept States) = {q0_0}\n\n");
         
         sb.append("States ( 6 states):\n");
-        sb.append("q0_1 = START STATE or (ones ≡ 0 (mod 3), last symbol = 0)\n");
+        sb.append("q0_1 = START STATE or (ones ≡ 0 (mod 3), last symbol = 1)\n");
         sb.append("q0_0 = ones ≡ 0 (mod 3), last symbol = 0   [ACCEPT]\n");
         sb.append("q1_0 = ones ≡ 1 (mod 3), last symbol = 0\n");
         sb.append("q1_1 = ones ≡ 1 (mod 3), last symbol = 1\n");
