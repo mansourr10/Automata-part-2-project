@@ -164,7 +164,8 @@ public class AutomataProjectApp extends JFrame {
     private void convertCfgToPda() {
         try {
             Grammar grammar = Grammar.parse(cfgInputArea.getText());
-            cfgOutputArea.setText(grammar.toPdaDescription());
+            // Append both the text description AND the diagram code
+            cfgOutputArea.setText(grammar.toPdaDescription() + grammar.toDotFormat());
         } catch (IllegalArgumentException ex) {
             cfgOutputArea.setText("Error:\n" + ex.getMessage());
         }
@@ -176,6 +177,14 @@ public class AutomataProjectApp extends JFrame {
         sb.append("We must track TWO things together:\n");
         sb.append("1) count(1s) mod 3\n");
         sb.append("2) whether the last symbol is 0 or 1\n\n");
+        
+        sb.append("5-Tuple Definition M = (Q, Σ, δ, q0, F):\n");
+        sb.append("Q (States) = {q0_1, q0_0, q1_0, q1_1, q2_0, q2_1}\n");
+        sb.append("Σ (Alphabet) = {0, 1}\n");
+        sb.append("δ (Transitions) = See table below\n");
+        sb.append("q0 (Start State) = q0_1\n");
+        sb.append("F (Accept States) = {q0_0}\n\n");
+        
         sb.append("States (Minimized to 6 states):\n");
         sb.append("q0_1 = START STATE or (ones ≡ 0 (mod 3), last symbol = 1)\n");
         sb.append("q0_0 = ones ≡ 0 (mod 3), last symbol = 0   [ACCEPT]\n");
@@ -243,7 +252,7 @@ public class AutomataProjectApp extends JFrame {
         };
     }
 
-    // New Method: Generates the Visual Diagram format
+    // Generates the Visual Diagram format for DFA
     private String buildDfaDotFormat(String finalState) {
         StringBuilder dot = new StringBuilder();
         dot.append("\n======================================================\n");
@@ -364,7 +373,35 @@ public class AutomataProjectApp extends JFrame {
             }
         }
 
+        // Generate the Graphviz Diagram for the a^n b^n PDA
+        sb.append(buildAnBnPdaDotFormat(state, accepted));
+
         pdaOutputArea.setText(sb.toString());
+    }
+
+    // Generates the Visual Diagram format for the a^n b^n PDA
+    private String buildAnBnPdaDotFormat(String finalState, boolean accepted) {
+        StringBuilder dot = new StringBuilder();
+        dot.append("\n======================================================\n");
+        dot.append(" GRAPHVIZ DIAGRAM CODE (Copy/Paste to dreampuf.github.io/GraphvizOnline)\n");
+        dot.append("======================================================\n");
+        dot.append("digraph PDA_AnBn {\n");
+        dot.append("  rankdir=LR;\n");
+        dot.append("  node [shape = doublecircle]; q_accept;\n");
+        dot.append("  node [shape = circle];\n");
+        dot.append("  start [shape = point];\n");
+        dot.append("  start -> q_push;\n");
+        dot.append("  q_push -> q_push [label=\"a, Z0 → A Z0\\na, A → A A\"];\n");
+        dot.append("  q_push -> q_pop [label=\"b, A → ε\"];\n");
+        dot.append("  q_pop -> q_pop [label=\"b, A → ε\"];\n");
+        dot.append("  q_push -> q_accept [label=\"ε, Z0 → Z0\"];\n");
+        dot.append("  q_pop -> q_accept [label=\"ε, Z0 → Z0\"];\n");
+        dot.append("  \n  // Highlights the final state reached by your string\n");
+        
+        String highlightState = accepted ? "q_accept" : finalState;
+        dot.append("  ").append(highlightState).append(" [style=filled, fillcolor=lightblue];\n");
+        dot.append("}\n");
+        return dot.toString();
     }
 
     private String stackToString(Deque<Character> stack) {
@@ -547,6 +584,42 @@ public class AutomataProjectApp extends JFrame {
             sb.append("- Whenever a terminal appears on top of the stack, it must match the next input symbol.\n");
             sb.append("- If the whole input is matched and only Z0 remains, the PDA goes to q_accept.\n");
             return sb.toString();
+        }
+
+        // Generates the Visual Diagram format for CFG-to-PDA
+        public String toDotFormat() {
+            StringBuilder dot = new StringBuilder();
+            dot.append("\n======================================================\n");
+            dot.append(" GRAPHVIZ DIAGRAM CODE FOR PDA (Copy/Paste to dreampuf.github.io/GraphvizOnline)\n");
+            dot.append("======================================================\n");
+            dot.append("digraph PDA {\n");
+            dot.append("  rankdir=LR;\n");
+            dot.append("  node [shape = doublecircle]; q_accept;\n");
+            dot.append("  node [shape = circle];\n");
+            dot.append("  start [shape = point];\n");
+            dot.append("  start -> q_start;\n");
+            
+            // Initial push
+            dot.append("  q_start -> q_loop [label=\"ε, ε → ").append(startSymbol).append(" Z0\"];\n");
+
+            // Grammar productions (The \"petals\")
+            for (Map.Entry<String, List<List<String>>> entry : productions.entrySet()) {
+                String lhs = entry.getKey();
+                for (List<String> rhs : entry.getValue()) {
+                    String rhsString = rhs.size() == 1 && rhs.get(0).equals("ε") ? "ε" : String.join(" ", rhs);
+                    dot.append("  q_loop -> q_loop [label=\"ε, ").append(lhs).append(" → ").append(rhsString).append("\"];\n");
+                }
+            }
+
+            // Terminal matching
+            for (String terminal : terminals) {
+                dot.append("  q_loop -> q_loop [label=\"").append(terminal).append(", ").append(terminal).append(" → ε\"];\n");
+            }
+
+            // Accept state
+            dot.append("  q_loop -> q_accept [label=\"ε, Z0 → Z0\"];\n");
+            dot.append("}\n");
+            return dot.toString();
         }
 
         private String formatSet(Set<String> set) {
