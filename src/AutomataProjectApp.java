@@ -179,27 +179,27 @@ public class AutomataProjectApp extends JFrame {
         sb.append("2) whether the last symbol is 0 or 1\n\n");
         
         sb.append("5-Tuple Definition M = (Q, Σ, δ, q0, F):\n");
-        sb.append("Q (States) = {q0_1, q0_0, q1_0, q1_1, q2_0, q2_1}\n");
+        sb.append("Q (States) = {q0, q1, q2, q3, q4, q5}\n");
         sb.append("Σ (Alphabet) = {0, 1}\n");
         sb.append("δ (Transitions) = See table below\n");
-        sb.append("q0 (Start State) = q0_1\n");
-        sb.append("F (Accept States) = {q0_0}\n\n");
+        sb.append("q0 (Start State) = q0\n");
+        sb.append("F (Accept States) = {q1}\n\n");
         
-        sb.append("States ( 6 states):\n");
-        sb.append("q0_1 = START STATE or (ones ≡ 0 (mod 3), last symbol = 1)\n");
-        sb.append("q0_0 = ones ≡ 0 (mod 3), last symbol = 0   [ACCEPT]\n");
-        sb.append("q1_0 = ones ≡ 1 (mod 3), last symbol = 0\n");
-        sb.append("q1_1 = ones ≡ 1 (mod 3), last symbol = 1\n");
-        sb.append("q2_0 = ones ≡ 2 (mod 3), last symbol = 0\n");
-        sb.append("q2_1 = ones ≡ 2 (mod 3), last symbol = 1\n\n");
+        sb.append("States (Minimized to 6 states):\n");
+        sb.append("q0 = START STATE or (ones ≡ 0 (mod 3), last symbol = 1)\n");
+        sb.append("q1 = ones ≡ 0 (mod 3), last symbol = 0   [ACCEPT]\n");
+        sb.append("q2 = ones ≡ 1 (mod 3), last symbol = 0\n");
+        sb.append("q3 = ones ≡ 1 (mod 3), last symbol = 1\n");
+        sb.append("q4 = ones ≡ 2 (mod 3), last symbol = 0\n");
+        sb.append("q5 = ones ≡ 2 (mod 3), last symbol = 1\n\n");
         sb.append("Transition table:\n");
         sb.append(String.format("%-6s %-8s %-8s%n", "State", "on 0", "on 1"));
-        sb.append(String.format("%-6s %-8s %-8s%n", "q0_1", "q0_0", "q1_1"));
-        sb.append(String.format("%-6s %-8s %-8s%n", "q0_0", "q0_0", "q1_1"));
-        sb.append(String.format("%-6s %-8s %-8s%n", "q1_0", "q1_0", "q2_1"));
-        sb.append(String.format("%-6s %-8s %-8s%n", "q1_1", "q1_0", "q2_1"));
-        sb.append(String.format("%-6s %-8s %-8s%n", "q2_0", "q2_0", "q0_1"));
-        sb.append(String.format("%-6s %-8s %-8s%n", "q2_1", "q2_0", "q0_1"));
+        sb.append(String.format("%-6s %-8s %-8s%n", "q0", "q1", "q3"));
+        sb.append(String.format("%-6s %-8s %-8s%n", "q1", "q1", "q3"));
+        sb.append(String.format("%-6s %-8s %-8s%n", "q2", "q2", "q5"));
+        sb.append(String.format("%-6s %-8s %-8s%n", "q3", "q2", "q5"));
+        sb.append(String.format("%-6s %-8s %-8s%n", "q4", "q4", "q0"));
+        sb.append(String.format("%-6s %-8s %-8s%n", "q5", "q4", "q0"));
         sb.append("\nTry a string and press 'Test String'.\n");
         return sb.toString();
     }
@@ -215,11 +215,11 @@ public class AutomataProjectApp extends JFrame {
             return;
         }
 
-        String state = "q0_1"; // Optimized start state
+        String state = "q0"; // Optimized start state
         int onesCount = 0;     // Integrated loop optimization
         
         sb.append("Simulation:\n");
-        sb.append("Start at state: q0_1\n");
+        sb.append("Start at state: q0\n");
         for (int i = 0; i < input.length(); i++) {
             char ch = input.charAt(i);
             if (ch == '1') {
@@ -230,7 +230,7 @@ public class AutomataProjectApp extends JFrame {
             state = next;
         }
 
-        boolean accepted = "q0_0".equals(state);
+        boolean accepted = "q1".equals(state);
 
         sb.append("\nFinal state: ").append(state).append("\n");
         sb.append("Number of 1s: ").append(onesCount).append("\n");
@@ -245,9 +245,9 @@ public class AutomataProjectApp extends JFrame {
 
     private String nextDfaState(String state, char ch) {
         return switch (state) {
-            case "q0_0", "q0_1" -> ch == '0' ? "q0_0" : "q1_1";
-            case "q1_0", "q1_1" -> ch == '0' ? "q1_0" : "q2_1";
-            case "q2_0", "q2_1" -> ch == '0' ? "q2_0" : "q0_1";
+            case "q1", "q0" -> ch == '0' ? "q1" : "q3";
+            case "q2", "q3" -> ch == '0' ? "q2" : "q5";
+            case "q4", "q5" -> ch == '0' ? "q4" : "q0";
             default -> throw new IllegalStateException("Unknown state: " + state);
         };
     }
@@ -260,22 +260,22 @@ public class AutomataProjectApp extends JFrame {
         dot.append("======================================================\n");
         dot.append("digraph DFA {\n");
         dot.append("  rankdir=LR;\n");
-        dot.append("  node [shape = doublecircle]; q0_0;\n");
+        dot.append("  node [shape = doublecircle]; q1;\n");
         dot.append("  node [shape = circle];\n");
         dot.append("  start [shape = point];\n");
-        dot.append("  start -> q0_1;\n");
-        dot.append("  q0_1 -> q0_0 [label=\"0\"];\n");
-        dot.append("  q0_1 -> q1_1 [label=\"1\"];\n");
-        dot.append("  q0_0 -> q0_0 [label=\"0\"];\n");
-        dot.append("  q0_0 -> q1_1 [label=\"1\"];\n");
-        dot.append("  q1_0 -> q1_0 [label=\"0\"];\n");
-        dot.append("  q1_0 -> q2_1 [label=\"1\"];\n");
-        dot.append("  q1_1 -> q1_0 [label=\"0\"];\n");
-        dot.append("  q1_1 -> q2_1 [label=\"1\"];\n");
-        dot.append("  q2_0 -> q2_0 [label=\"0\"];\n");
-        dot.append("  q2_0 -> q0_1 [label=\"1\"];\n");
-        dot.append("  q2_1 -> q2_0 [label=\"0\"];\n");
-        dot.append("  q2_1 -> q0_1 [label=\"1\"];\n");
+        dot.append("  start -> q0;\n");
+        dot.append("  q0 -> q1 [label=\"0\"];\n");
+        dot.append("  q0 -> q3 [label=\"1\"];\n");
+        dot.append("  q1 -> q1 [label=\"0\"];\n");
+        dot.append("  q1 -> q3 [label=\"1\"];\n");
+        dot.append("  q2 -> q2 [label=\"0\"];\n");
+        dot.append("  q2 -> q5 [label=\"1\"];\n");
+        dot.append("  q3 -> q2 [label=\"0\"];\n");
+        dot.append("  q3 -> q5 [label=\"1\"];\n");
+        dot.append("  q4 -> q4 [label=\"0\"];\n");
+        dot.append("  q4 -> q0 [label=\"1\"];\n");
+        dot.append("  q5 -> q4 [label=\"0\"];\n");
+        dot.append("  q5 -> q0 [label=\"1\"];\n");
         dot.append("  \n  // Highlights the final state reached by your string\n");
         dot.append("  ").append(finalState).append(" [style=filled, fillcolor=lightblue];\n");
         dot.append("}\n");
