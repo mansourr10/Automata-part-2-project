@@ -283,7 +283,7 @@ private boolean isValidAnBn(String s) {
         sb.append("q0 (Start State) = q0\n");
         sb.append("F (Accept States) = {q1}\n\n");
         
-        sb.append("States (Minimized to 6 states):\n");
+        sb.append("States (6 states):\n");
         sb.append("q0 = START STATE or (ones ≡ 0 (mod 3), last symbol = 1)\n");
         sb.append("q1 = ones ≡ 0 (mod 3), last symbol = 0   [ACCEPT]\n");
         sb.append("q2 = ones ≡ 1 (mod 3), last symbol = 0\n");
